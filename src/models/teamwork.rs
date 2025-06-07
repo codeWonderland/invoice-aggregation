@@ -13,100 +13,108 @@ impl TryFrom<&serde_json::Value> for Client {
     type Error = InternalError;
 
     fn try_from(value: &serde_json::Value) -> Result<Self, Self::Error> {
-        let name = value.get("name")
+        let name = value
+            .get("name")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::JsonParsingError("name".to_string()))?
+            .ok_or_else(|| InternalError::JsonParsing("name".to_string()))?
             .to_owned();
-        let lists = value.get("lists")
+        let lists = value
+            .get("lists")
             .and_then(|v| v.as_array())
-            .ok_or_else(|| InternalError::JsonParsingError("lists".to_string()))?
+            .ok_or_else(|| InternalError::JsonParsing("lists".to_string()))?
             .iter()
             .map(|list| -> Result<TaskList, InternalError> {
-                let id = list.get("id")
+                let id = list
+                    .get("id")
                     .and_then(|v| v.as_str())
-                    .ok_or_else(|| InternalError::JsonParsingError("id".to_string()))?
+                    .ok_or_else(|| InternalError::JsonParsing("id".to_string()))?
                     .to_owned();
-                let name = list.get("name")
+                let name = list
+                    .get("name")
                     .and_then(|v| v.as_str())
-                    .ok_or_else(|| InternalError::JsonParsingError("name".to_string()))?
+                    .ok_or_else(|| InternalError::JsonParsing("name".to_string()))?
                     .to_owned();
 
-                Ok(TaskList {
-                    id,
-                    name
-                })
+                Ok(TaskList { id, name })
             })
             .collect::<Result<Vec<TaskList>, InternalError>>()?;
 
         Ok(Client {
             name,
             lists,
-            entries_by_list: vec![]
+            entries_by_list: vec![],
         })
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct TaskList {
-    pub(crate) id: String, // tasklistId
+    pub(crate) id: String,   // tasklistId
     pub(crate) name: String, // todo-list-name
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct TimeEntry {
-    pub(crate) hours_spent: i32, // hours
+    pub(crate) hours_spent: i32,   // hours
     pub(crate) minutes_spent: i32, // minutes
-    pub(crate) task_list: TaskList, 
-    pub(crate) task_name: String, // todo-item-name
+    pub(crate) task_list: TaskList,
+    pub(crate) task_name: String,   // todo-item-name
     pub(crate) description: String, // description
-    pub(crate) date: NaiveDate, // dateUserPerspective
+    pub(crate) date: NaiveDate,     // dateUserPerspective
 }
 
-impl TryFrom<&serde_json::Value> for TimeEntry {
+impl TryFrom<serde_json::Value> for TimeEntry {
     type Error = InternalError;
 
-    fn try_from(value: &serde_json::Value) -> Result<Self, Self::Error> {
-        let hours_spent = value.get("hours")
+    fn try_from(value: serde_json::Value) -> Result<Self, Self::Error> {
+        let hours_spent = value
+            .get("hours")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("hours".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("hours".to_string()))?
             .parse::<i32>()
-            .map_err(|e| InternalError::TimeEntryParsingError(e.to_string()))?;
-        let minutes_spent = value.get("minutes")
+            .map_err(|e| InternalError::TimeEntryParsing(e.to_string()))?;
+        let minutes_spent = value
+            .get("minutes")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("minutes".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("minutes".to_string()))?
             .parse::<i32>()
-            .map_err(|e| InternalError::TimeEntryParsingError(e.to_string()))?;
-        let task_list_id = value.get("tasklistId")
+            .map_err(|e| InternalError::TimeEntryParsing(e.to_string()))?;
+        let task_list_id = value
+            .get("tasklistId")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("tasklistId".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("tasklistId".to_string()))?
             .to_owned();
-        let task_list = value.get("todo-list-name")
+        let task_list = value
+            .get("todo-list-name")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("todo-list-name".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("todo-list-name".to_string()))?
             .to_owned();
-        let task_name = value.get("todo-item-name")
+        let task_name = value
+            .get("todo-item-name")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("todo-list-name".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("todo-list-name".to_string()))?
             .to_owned();
-        let description = value.get("description")
+        let description = value
+            .get("description")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("todo-list-name".to_string()))?
+            .ok_or_else(|| InternalError::TimeEntryParsing("todo-list-name".to_string()))?
             .to_owned();
-        let timestamp_string = value.get("dateUserPerspective")
+        let timestamp_string = value
+            .get("dateUserPerspective")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| InternalError::TimeEntryParsingError("todo-list-name".to_string()))?;
-        let date = parse_date(&timestamp_string)?;
+            .ok_or_else(|| InternalError::TimeEntryParsing("todo-list-name".to_string()))?;
+        let date = parse_date(timestamp_string)?;
 
         Ok(TimeEntry {
             hours_spent,
             minutes_spent,
             task_list: TaskList {
                 id: task_list_id,
-                name: task_list
+                name: task_list,
             },
             task_name,
             description,
-            date
+            date,
         })
     }
 }
@@ -116,3 +124,4 @@ pub(crate) struct TimeEntriesByList {
     pub(crate) list: TaskList,
     pub(crate) entries: Vec<TimeEntry>,
 }
+
