@@ -25,17 +25,9 @@ async fn main() -> Result<(), InternalError> {
     entries = prune_entries(entries, args.last_month)?;
     entries = remove_duplicates(entries);
     
-    // Extra info for debug
-    //let active_lists = entries.iter().map(|entry| entry.task_list.clone()).collect::<Vec<TaskList>>();
-    //let unique_lists = remove_duplicates(active_lists);
-    //println!("{:#?}", unique_lists);
-    //println!("{:#?}", entries);
-    
     let mut clients = read_clients()?;
-    //println!("{:#?}", clients);
 
     associate_entries_with_clients(&mut clients, entries)?;
-    //println!("{:#?}", clients);
 
     build_invoices(clients, args.last_month)?;
     
