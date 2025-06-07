@@ -72,7 +72,7 @@ pub fn build_invoices(clients: Vec<Client>, last_month: bool) -> Result<(), Inte
                 writeln!(client_file, "{}", date.format("%A, %B %-d")).map_err(|e| InternalError::FileError(e.to_string()))?;
 
                 for entry in date_entries {
-                    writeln!(client_file, "{} ({} hours, {} minutes) - {}", entry.task_name, entry.hours_spent, entry.minutes_spent, entry.description).map_err(|e| InternalError::FileError(e.to_string()))?;
+                    writeln!(client_file, "- {} ({} hours, {} minutes) - {}", entry.task_name, entry.hours_spent, entry.minutes_spent, entry.description).map_err(|e| InternalError::FileError(e.to_string()))?;
                 }
             }
 
