@@ -74,14 +74,16 @@ pub fn build_invoices(clients: Vec<Client>, last_month: bool) -> Result<(), Inte
                 .map(|entry| entry.hours_spent * 60 + entry.minutes_spent)
                 .sum::<i32>();
 
-            writeln!(
-                client_file,
-                "{} ({} hours, {} minutes)",
-                list.list.name,
-                list_time / 60,
-                list_time % 60
-            )
-            .map_err(|e| InternalError::File(e.to_string()))?;
+            if list.entries.len() > 1 {
+                writeln!(
+                    client_file,
+                    "{} ({} hours, {} minutes)",
+                    list.list.name,
+                    list_time / 60,
+                    list_time % 60
+                )
+                .map_err(|e| InternalError::File(e.to_string()))?;
+            }
 
             // Sort dates
             let mut dates = list
@@ -119,4 +121,3 @@ pub fn build_invoices(clients: Vec<Client>, last_month: bool) -> Result<(), Inte
 
     Ok(())
 }
-

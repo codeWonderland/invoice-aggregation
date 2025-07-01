@@ -66,4 +66,3 @@ pub fn associate_entries_with_clients(
 
     Ok(())
 }
-
